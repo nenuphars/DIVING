@@ -1,0 +1,8 @@
+#board{
+    margin: 0 auto;
+    margin-top: 10vh;
+    width: 800px;
+    height: 500px;
+    background-image: linear-gradient(aqua, darkblue
+    ) ;
+}
