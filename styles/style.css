@@ -1,4 +1,5 @@
 #board{
+    display: none;
     margin: 0 auto;
     margin-top: 10vh;
     width: 800px;
