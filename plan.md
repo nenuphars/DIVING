@@ -8,12 +8,12 @@ Diving for treasure:
 
 
 ## MVP
-[ ] create folders, files and link to a github repository
-[ ] create the game board: waterline and underwater area
-[ ] create a start screen
-[ ] create a player sprite
-[ ] make the player move by the arrow buttons
-[ ] create a treasure and place it underwater
+[x] create folders, files and link to a github repository
+[x] create the game board: waterline and underwater area
+[x] create a start screen
+[x] create a player sprite
+[x] make the player move by the arrow buttons
+[x] create a treasure and place it underwater
 [ ] set a timer for air for each dive
 [ ] create a collision for the treasure items
 [ ] create a win and lose screen or popup with a reload button

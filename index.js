@@ -1,7 +1,7 @@
 class Game {
   constructor() {
     this.player = null;
-    this.remainingAir = 30;
+    this.remainingAir = 10000;
     this.timeElapsed = 0;
     this.treasures = [];
     this.score = 0;
@@ -30,20 +30,20 @@ attachEventListeners() {
         const input = event.key;
         if (input === "ArrowDown") {
             console.log("listened for a key")
-            this.player.directionY = 1;
+            this.player.directionY = 2;
         }
         if (input === "ArrowUp") {
-            this.player.directionY = -1;
+            this.player.directionY = -2;
         }
         if (input === "ArrowLeft") {
-            this.player.directionX = -1;
+            this.player.directionX = -2;
         }
         if (input === "ArrowRight") {
-            this.player.directionX = 1;
+            this.player.directionX = 2;
         }
         
     });
-
+    // resets the direction values when keys are up, except arrow down in order to "float" up
     window.addEventListener("keyup", (event) => {
         const input = event.key;
         if (input === "ArrowDown") {
@@ -70,12 +70,31 @@ gameLoop(){
     //console.log("in the game loop")
     if(this.gameOver===true){
         alert("Game Over")
-        return;
+        return
     }
     this.update()
+    if(this.player.top >= 40){
+        this.airTimer()
+        
+    }
+
 
     window.requestAnimationFrame(()=> this.gameLoop())
 }
+airTimer(){
+    const air = setInterval(()=>{
+        this.remainingAir -= 1
+        if(this.player.top <= 40){
+            this.remainingAir = 10000
+        }
+        if(this.remainingAir===0){
+            this.gameOver = true
+            return
+        }
+    },1000)
+    console.log(this.remainingAir)
+  }
+  
 }
 
 class Player {
@@ -105,8 +124,6 @@ class Player {
     return sprite;
   }
   move() {
-    
-    
     this.left += this.directionX
     this.top += this.directionY
 
