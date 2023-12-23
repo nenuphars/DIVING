@@ -1,9 +1,16 @@
-#board{
-    display: none;
-    margin: 0 auto;
-    margin-top: 10vh;
-    width: 800px;
-    height: 500px;
-    background-image: linear-gradient(aqua, darkblue
-    ) ;
+#board {
+  display: none;
+  margin: 0 auto;
+  margin-top: 10vh;
+  width: 800px;
+  height: 500px;
+  background-image: linear-gradient(aqua, darkblue);
+}
+#end-screen {
+    display:none;
+  width: 800px;
+  height: 500px;
+}
+.replay{
+    border: 2px solid black;
 }

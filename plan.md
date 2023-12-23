@@ -14,8 +14,8 @@ Diving for treasure:
 [x] create a player sprite
 [x] make the player move by the arrow buttons
 [x] create a treasure and place it underwater
-[ ] set a timer for air for each dive
-[ ] create a collision for the treasure items
+[x] set a timer for air for each dive
+[x] create a collision for the treasure items
 [ ] create a win and lose screen or popup with a reload button
 [ ] (Extra) make it look nice, add rocks, maybe fish and a boat
 [ ] (Extra) create a stopwatch to enable high scores and display them after each game
