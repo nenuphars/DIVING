@@ -1,3 +1,10 @@
+html,
+body{
+    font-family: sans-serif;
+    color: blue;
+    margin: 0;
+    padding: 0;
+}
 #board {
   display: none;
   margin: 0 auto;
@@ -7,10 +14,21 @@
   background-image: linear-gradient(aqua, darkblue);
 }
 #end-screen {
-    display:none;
+  display:none;
   width: 800px;
   height: 500px;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(coral, yellow);
 }
-.replay{
-    border: 2px solid black;
+.reload{
+    height: 10vh;
+    width: 20vw;
+    border: 2px solid blue;
+    font-size: 24px;
+    border-radius: 4px;
+    background-color: aquamarine;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

@@ -6,7 +6,7 @@ class Game {
     this.treasures = [];
     this.score = 0;
     this.gameOver = false;
-    this.gameWon = false
+    this.gameWon = false;
   }
   start() {
     this.player = new Player();
@@ -20,26 +20,25 @@ class Game {
     this.treasures.push(firstTreasure, secondTreasure, thirdTreasure);
 
     // create a stopwatch element that keeps track of the elapsed time
-    const stopWatch = document.createElement("div")
-    stopWatch.id = "stop-watch"
-    
-    const board = document.getElementById("board")
-    board.appendChild(stopWatch)
+    const stopWatch = document.createElement("div");
+    stopWatch.id = "stop-watch";
+
+    const board = document.getElementById("board");
+    board.appendChild(stopWatch);
 
     // define an interval to keep count the seconds elapsed
-    setInterval(()=>{
-        this.timeElapsed+= 1
-    },1000)
+    setInterval(() => {
+      this.timeElapsed += 1;
+    }, 1000);
 
     // create an element for the air timer needed for each dive
-    const airTimer = document.createElement("div")
-    airTimer.id = "air-timer"
+    const airTimer = document.createElement("div");
+    airTimer.id = "air-timer";
 
-    board.appendChild(airTimer)
-    
+    board.appendChild(airTimer);
+
     this.gameLoop();
-    this.airTimer()
-
+    this.airTimer();
   }
 
   detectCollision() {
@@ -64,7 +63,7 @@ class Game {
       if (treasure.isCollected === true) {
         treasure.domElement.style.display = "none";
         this.score += 20;
-        this.treasures.splice(index, 1)
+        this.treasures.splice(index, 1);
       }
     });
   }
@@ -75,7 +74,6 @@ class Game {
       board.style.display = "block";
     });
     // listen for the arrow keys and change the direction value accordingly
-    let diveCount = 0
     window.addEventListener("keydown", (event) => {
       const input = event.key;
       if (input === "ArrowDown") {
@@ -90,6 +88,9 @@ class Game {
       }
       if (input === "ArrowRight") {
         this.player.directionX = 1;
+      }
+      if(this.player.diveCount === 3 && input === "ArrowDown"){
+        this.gameOver = true
       }
     });
     // resets the direction values when keys are up
@@ -115,77 +116,77 @@ class Game {
     //console.log("in the update method")
     this.player.move();
     this.detectCollision();
+    if(this.player.top===21){
+        console.log(this.player.diveCount)
+        this.player.diveCount+= 0.5
+    }
 
-    const stopWatch = document.getElementById("stop-watch")
-    stopWatch.innerHTML = `<h5>Time Elapsed: ${this.timeElapsed}</h5>`
+    const stopWatch = document.getElementById("stop-watch");
+    stopWatch.innerHTML = `<h5>Time Elapsed: ${this.timeElapsed}</h5>`;
 
-    const diveTimer = document.getElementById("air-timer")
-    diveTimer.innerHTML = `<h5>Remaining air: ${this.remainingAir}`
-    
+    const diveTimer = document.getElementById("air-timer");
+    diveTimer.innerHTML = `<h5>Remaining air: ${this.remainingAir}`;
   }
   gameLoop() {
     // check the player state
     if (this.player.top > 40) {
-        this.player.state.diving = true;
-        this.player.state.floating = false;
+      this.player.state.diving = true;
+      this.player.state.floating = false;
+    } else if (this.player.top < 40) {
+      this.player.state.diving = false;
+      this.player.state.floating = true;
     }
-    else if(this.player.top < 40){
-        this.player.state.diving = false;
-        this.player.state.floating = true;
 
-    }
-    
     this.update();
 
     // check if the game is won or lost
-    
-    if(!this.treasures.length && this.player.state.floating === true){
-        this.gameWon = true
+    if(this.player.diveCount > 3){
+        alert("You haven't got enough air to dive again")
+        this.gameOver = true;
     }
-    if(this.gameWon || this.gameOver){
-        this.gameEnd()
-        return
+    if (!this.treasures.length && this.player.state.floating === true) {
+      this.gameWon = true;
+    }
+    if (this.gameWon || this.gameOver) {
+      this.gameEnd();
+      return;
     }
 
-    
     window.requestAnimationFrame(() => this.gameLoop());
   }
   airTimer() {
-    console.log("starting the air timer")
+    // console.log("starting the air timer")
     setInterval(() => {
       if (this.player.state.floating === true) {
         this.remainingAir = 30;
       }
-      if(this.player.state.diving === true){
-        this.remainingAir -= 1
+      if (this.player.state.diving === true) {
+        this.remainingAir -= 1;
       }
       if (this.remainingAir === 0) {
         this.gameOver = true;
       }
     }, 1000);
   }
-  gameEnd(){
-      // change from game screen to end screen
-      const board = document.getElementById("board")
-      board.style.display = "none"
-      const endScreen = document.getElementById("end-screen")
-      endScreen.style.display = "flex"
+  gameEnd() {
+    // change from game screen to end screen
+    const board = document.getElementById("board");
+    board.style.display = "none";
+    const endScreen = document.getElementById("end-screen");
+    endScreen.style.display = "flex";
 
     // calculate the score if the game was won
-    if(this.gameWon){
-        const time = this.timeElapsed
-        if(time <= 60){
-            this.score += 10
-            this.score += 60 - time
-        }
-        if(time <= 40){
-            this.score += 20
-            this.score += 40 - time
-        }
-        endScreen.innerHTML = `<h1>Your score: ${this.score}</h1>`
-    }
-    if(this.gameOver){
-        endScreen.classList.add("replay")
+    if (this.gameWon) {
+      const time = this.timeElapsed;
+      if (time <= 60) {
+        this.score += 10;
+        this.score += 60 - time;
+      }
+      if (time <= 40) {
+        this.score += 20;
+        this.score += 40 - time;
+      }
+      endScreen.innerHTML = `<h1>Your score: /n ${this.score}</h1>`;
     }
   }
 }
@@ -198,7 +199,7 @@ class Player {
     this.top = 20;
     this.directionX = 0;
     this.directionY = 0;
-    this.countDives = 0;
+    this.diveCount = 0;
     this.state = {
       floating: true,
       diving: false,
