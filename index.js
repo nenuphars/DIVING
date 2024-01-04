@@ -37,6 +37,12 @@ class Game {
 
     board.appendChild(airTimer);
 
+    // create an element that will show the player how many dives they can make
+    const diveCounter = document.createElement("div")
+    diveCounter.id = "dive-counter"
+
+    board.appendChild(diveCounter)
+
     this.gameLoop();
     this.airTimer();
   }
@@ -75,21 +81,28 @@ class Game {
     });
     // listen for the arrow keys and change the direction value accordingly
     window.addEventListener("keydown", (event) => {
+        const sprite = document.getElementById("diver-img")
       const input = event.key;
       if (input === "ArrowDown") {
         // console.log("listened for a key")
         this.player.directionY = 1;
+        sprite.classList.add("downwards")
       }
       if (input === "ArrowUp") {
-        this.player.directionY = -2;
-      }
-      if (input === "ArrowLeft") {
-        this.player.directionX = -1;
-      }
-      if (input === "ArrowRight") {
-        this.player.directionX = 1;
-      }
-      if(this.player.diveCount === 3 && input === "ArrowDown"){
+          this.player.directionY = -2;
+          sprite.classList.add("upwards")
+        }
+        if (input === "ArrowLeft") {
+            this.player.directionX = -1;
+            sprite.classList.remove("right-facing")
+            sprite.classList.add("left-facing")
+        }
+        if (input === "ArrowRight") {
+            this.player.directionX = 1;
+            sprite.classList.remove("left-facing")
+            sprite.classList.add("right-facing")
+        }
+      if(this.player.diveCount === 4 && input === "ArrowDown"){
         this.gameOver = true
       }
     });
@@ -97,12 +110,15 @@ class Game {
     // arrow down is treated specially to make the player float up if it isnt pressed
     window.addEventListener("keyup", (event) => {
       const input = event.key;
+      const sprite = document.getElementById("diver-img")
       if (input === "ArrowDown") {
         //console.log("listened for a key")
         this.player.directionY = -1;
+        sprite.classList.remove("downwards")
       }
       if (input === "ArrowUp") {
-        this.player.directionY = 0;
+        this.player.directionY = -1;
+        sprite.classList.remove("upwards")
       }
       if (input === "ArrowLeft") {
         this.player.directionX = 0;
@@ -116,16 +132,20 @@ class Game {
     //console.log("in the update method")
     this.player.move();
     this.detectCollision();
-    if(this.player.top===21){
-        console.log(this.player.diveCount)
+    if(this.player.top===26){
         this.player.diveCount+= 0.5
+        this.player.diveCount = Math.round(this.player.diveCount)
+        console.log(this.player.diveCount)
     }
 
     const stopWatch = document.getElementById("stop-watch");
-    stopWatch.innerHTML = `<h5>Time Elapsed: ${this.timeElapsed}</h5>`;
+    stopWatch.innerHTML = `<h5>Time Elapsed:<br> ${this.timeElapsed}</h5>`;
 
     const diveTimer = document.getElementById("air-timer");
-    diveTimer.innerHTML = `<h5>Remaining air: ${this.remainingAir}`;
+    diveTimer.innerHTML = `<h5>Remaining air:<br> ${this.remainingAir}`;
+
+    const diveCounter = document.getElementById("dive-counter")
+    diveCounter.innerHTML = `<h5>Numer of dives:<br>${this.player.diveCount}</h5>`
   }
   gameLoop() {
     // check the player state
@@ -175,6 +195,7 @@ class Game {
     const endScreen = document.getElementById("end-screen");
     endScreen.style.display = "flex";
 
+    const replayButton = document.getElementById("reload")
     // calculate the score if the game was won
     if (this.gameWon) {
       const time = this.timeElapsed;
@@ -186,7 +207,10 @@ class Game {
         this.score += 20;
         this.score += 40 - time;
       }
-      endScreen.innerHTML = `<h1>Your score: /n ${this.score}</h1>`;
+      endScreen.innerHTML = `<div><h2>You won!</h2><br><br>Score:<h2 class="score">${this.score}</h2></div>`,replayButton;
+    }
+    if(this.gameOver===true){
+        endScreen.innerHTML = `<div><h2>You lost</h2>$</div>`,replayButton
     }
   }
 }
@@ -211,11 +235,12 @@ class Player {
   spawnPlayer() {
     // create the player sprite
     const sprite = document.createElement("img");
-    sprite.id = "diverImg";
+    sprite.id = "diver-img";
     sprite.src = "./img/diver_sprite.png";
     sprite.style.height = "60px";
     sprite.style.left = `${this.left}px`;
     sprite.style.top = `${this.top}px`;
+    sprite.classList.add("right-facing")
 
     // append the sprite in to the board
     const board = document.getElementById("board");
@@ -244,7 +269,7 @@ class Player {
   }
 
   updatePosition() {
-    const diver = document.getElementById("diverImg");
+    const diver = document.getElementById("diver-img");
     diver.style.left = `${this.left}px`;
     diver.style.top = `${this.top}px`;
   }
@@ -264,7 +289,7 @@ class Treasure {
     treasure.style.width = `${this.width}`;
     treasure.style.height = `${this.height}`;
     treasure.style.backgroundColor = color;
-    treasure.style.position = "absolute";
+    treasure.style.position = "relative";
 
     // first location
 
