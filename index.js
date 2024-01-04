@@ -9,42 +9,54 @@ class Game {
     this.gameWon = false;
   }
   start() {
-    this.player = new Player();
-    this.attachEventListeners();
+    const board = document.getElementById("board");
+    const playButton = document.getElementById("play");
+    this.airTimer();
+    playButton.addEventListener("click", function () {
+        const startScreen = document.getElementById("start-screen");
+        startScreen.style.display = "none";
+        board.style.display = "block";
+        this.treasures.forEach(item, ()=>{
+            item.style.display = "block"
+        })
+        this.timeElapsed = 0;
+    });
+    // define an interval to keep count the seconds elapsed
+    setInterval(() => {
+        this.timeElapsed += 1;
+    }, 1000);
 
+    // set up the game board with player, treasures and divs for timers
+    this.player = new Player();
+    
     // create three treasure elements
     const firstTreasure = new Treasure("coral");
     const secondTreasure = new Treasure("yellow");
     const thirdTreasure = new Treasure("pink");
     // put the treasure items into the array
     this.treasures.push(firstTreasure, secondTreasure, thirdTreasure);
-
+    
     // create a stopwatch element that keeps track of the elapsed time
     const stopWatch = document.createElement("div");
     stopWatch.id = "stop-watch";
-
-    const board = document.getElementById("board");
+    
     board.appendChild(stopWatch);
-
-    // define an interval to keep count the seconds elapsed
-    setInterval(() => {
-      this.timeElapsed += 1;
-    }, 1000);
-
+    
+    
+    
     // create an element for the air timer needed for each dive
     const airTimer = document.createElement("div");
     airTimer.id = "air-timer";
-
+    
     board.appendChild(airTimer);
-
+    
     // create an element that will show the player how many dives they can make
-    const diveCounter = document.createElement("div")
-    diveCounter.id = "dive-counter"
-
-    board.appendChild(diveCounter)
-
+    const diveCounter = document.createElement("div");
+    diveCounter.id = "dive-counter";
+    board.appendChild(diveCounter);
+    
+    this.attachEventListeners();
     this.gameLoop();
-    this.airTimer();
   }
 
   detectCollision() {
@@ -74,51 +86,46 @@ class Game {
     });
   }
   attachEventListeners() {
-    window.addEventListener("load", function () {
-      // making the board visible
-      const board = document.getElementById("board");
-      board.style.display = "block";
-    });
     // listen for the arrow keys and change the direction value accordingly
     window.addEventListener("keydown", (event) => {
-        const sprite = document.getElementById("diver-img")
+      const sprite = document.getElementById("diver-img");
       const input = event.key;
       if (input === "ArrowDown") {
         // console.log("listened for a key")
         this.player.directionY = 1;
-        sprite.classList.add("downwards")
+        sprite.classList.add("downwards");
       }
       if (input === "ArrowUp") {
-          this.player.directionY = -2;
-          sprite.classList.add("upwards")
-        }
-        if (input === "ArrowLeft") {
-            this.player.directionX = -1;
-            sprite.classList.remove("right-facing")
-            sprite.classList.add("left-facing")
-        }
-        if (input === "ArrowRight") {
-            this.player.directionX = 1;
-            sprite.classList.remove("left-facing")
-            sprite.classList.add("right-facing")
-        }
-      if(this.player.diveCount === 4 && input === "ArrowDown"){
-        this.gameOver = true
+        this.player.directionY = -2;
+        sprite.classList.add("upwards");
+      }
+      if (input === "ArrowLeft") {
+        this.player.directionX = -1;
+        sprite.classList.remove("right-facing");
+        sprite.classList.add("left-facing");
+      }
+      if (input === "ArrowRight") {
+        this.player.directionX = 1;
+        sprite.classList.remove("left-facing");
+        sprite.classList.add("right-facing");
+      }
+      if (this.player.diveCount === 4 && input === "ArrowDown") {
+        this.gameOver = true;
       }
     });
     // resets the direction values when keys are up
     // arrow down is treated specially to make the player float up if it isnt pressed
     window.addEventListener("keyup", (event) => {
       const input = event.key;
-      const sprite = document.getElementById("diver-img")
+      const sprite = document.getElementById("diver-img");
       if (input === "ArrowDown") {
         //console.log("listened for a key")
         this.player.directionY = -1;
-        sprite.classList.remove("downwards")
+        sprite.classList.remove("downwards");
       }
       if (input === "ArrowUp") {
         this.player.directionY = -1;
-        sprite.classList.remove("upwards")
+        sprite.classList.remove("upwards");
       }
       if (input === "ArrowLeft") {
         this.player.directionX = 0;
@@ -132,10 +139,10 @@ class Game {
     //console.log("in the update method")
     this.player.move();
     this.detectCollision();
-    if(this.player.top===26){
-        this.player.diveCount+= 0.5
-        this.player.diveCount = Math.round(this.player.diveCount)
-        console.log(this.player.diveCount)
+    if (this.player.top === 26) {
+      this.player.diveCount += 0.5;
+      this.player.diveCount = Math.round(this.player.diveCount);
+      console.log(this.player.diveCount);
     }
 
     const stopWatch = document.getElementById("stop-watch");
@@ -144,8 +151,8 @@ class Game {
     const diveTimer = document.getElementById("air-timer");
     diveTimer.innerHTML = `<h5>Remaining air:<br> ${this.remainingAir}`;
 
-    const diveCounter = document.getElementById("dive-counter")
-    diveCounter.innerHTML = `<h5>Numer of dives:<br>${this.player.diveCount}</h5>`
+    const diveCounter = document.getElementById("dive-counter");
+    diveCounter.innerHTML = `<h5>Numer of dives:<br>${this.player.diveCount}</h5>`;
   }
   gameLoop() {
     // check the player state
@@ -160,9 +167,9 @@ class Game {
     this.update();
 
     // check if the game is won or lost
-    if(this.player.diveCount > 3){
-        alert("You haven't got enough air to dive again")
-        this.gameOver = true;
+    if (this.player.diveCount > 3) {
+      alert("You haven't got enough air to dive again");
+      this.gameOver = true;
     }
     if (!this.treasures.length && this.player.state.floating === true) {
       this.gameWon = true;
@@ -195,7 +202,7 @@ class Game {
     const endScreen = document.getElementById("end-screen");
     endScreen.style.display = "flex";
 
-    const replayButton = document.getElementById("reload")
+    const replayButton = document.getElementById("reload");
     // calculate the score if the game was won
     if (this.gameWon) {
       const time = this.timeElapsed;
@@ -207,10 +214,11 @@ class Game {
         this.score += 20;
         this.score += 40 - time;
       }
-      endScreen.innerHTML = `<div><h2>You won!</h2><br><br>Score:<h2 class="score">${this.score}</h2></div>`,replayButton;
+      (endScreen.innerHTML = `<div><h2>You won!</h2><br><br>Score:<h2 class="score">${this.score}</h2></div>`),
+        replayButton;
     }
-    if(this.gameOver===true){
-        endScreen.innerHTML = `<div><h2>You lost</h2>$</div>`,replayButton
+    if (this.gameOver === true) {
+      (endScreen.innerHTML = `<div><h2>You lost</h2>$</div>`), replayButton;
     }
   }
 }
@@ -240,7 +248,7 @@ class Player {
     sprite.style.height = "60px";
     sprite.style.left = `${this.left}px`;
     sprite.style.top = `${this.top}px`;
-    sprite.classList.add("right-facing")
+    sprite.classList.add("right-facing");
 
     // append the sprite in to the board
     const board = document.getElementById("board");

@@ -3,9 +3,41 @@
 html,
 body{
     font-family: 'Rubik', sans-serif;
-    color: blue;
+    color: black;
     margin: 0;
     padding: 0;
+}
+#start-screen{
+    display:block;
+}
+#instructions{
+    width: 800px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#title{
+    font-weight: 300;
+    margin-bottom: 4px;
+}
+
+#instructions p{
+    width: 300px;
+    text-align: center;
+    padding: 10px 0 40px;
+}
+button{
+    height: 50px;
+    width: 110px;
+    border: 2px solid #8A6EFF;
+    color:rgb(41, 4, 94);
+    font-family: "Rubik";
+    font-size: 18px;
+    font-weight:500;
+    border-radius: 4px;
+    background-image: linear-gradient(#9ef96d,#8A6EFF );
 }
 #board {
   display: none;
