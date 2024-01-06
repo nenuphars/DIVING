@@ -43,14 +43,15 @@ button{
   display: none;
   margin: 0 auto;
   margin-top: 10vh;
-  width: 800px;
-  height: 500px;
   background-image: linear-gradient(aqua, darkblue);
 }
 #end-screen {
   display:none;
   width: 800px;
   height: 500px;
+  position: relative;
+  margin: 0 auto;
+  top: 10vh;
   text-align:center;
   justify-content: center;
   align-items: center;
@@ -59,7 +60,7 @@ button{
 .score{
     font-size: 36px;
 }
-.reload{
+#reload{
     height: 10vh;
     width: 20vw;
     border: 2px solid blue;
@@ -92,4 +93,18 @@ button{
 }
 .right-facing.upwards{
     transform: scaleX(1) rotate(-90deg);
+}
+
+#shell{
+    background-image: url("../img/shell.png");
+    background-size: contain; 
+    
+}
+#treasure-chest{
+    background-image: url("../img/treasure_chest.png");
+    background-size: contain;
+}
+#jewel{
+    background-image: url("../img/jewel.png");
+    background-size: contain;
 }

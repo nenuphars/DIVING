@@ -1,62 +1,64 @@
 class Game {
   constructor() {
     this.player = null;
+    this.treasures = [];
+    this.width = 800;
+    this.height = 500;
+    this.hasStarted = false;
     this.remainingAir = 30;
     this.timeElapsed = 0;
-    this.treasures = [];
     this.score = 0;
     this.gameOver = false;
     this.gameWon = false;
   }
-  start() {
+  play() {
+    const startScreen = document.getElementById("start-screen");
+    startScreen.style.display = "none";
     const board = document.getElementById("board");
-    const playButton = document.getElementById("play");
-    this.airTimer();
-    playButton.addEventListener("click", function () {
-        const startScreen = document.getElementById("start-screen");
-        startScreen.style.display = "none";
-        board.style.display = "block";
-        this.treasures.forEach(item, ()=>{
-            item.style.display = "block"
-        })
-        this.timeElapsed = 0;
-    });
-    // define an interval to keep count the seconds elapsed
-    setInterval(() => {
-        this.timeElapsed += 1;
-    }, 1000);
-
+    board.style.width = `${this.width}px`;
+    board.style.height = `${this.height}px`;
+    board.style.display = "block";
     // set up the game board with player, treasures and divs for timers
-    this.player = new Player();
-    
+    this.player = new Player(this.width, this.height);
+
     // create three treasure elements
-    const firstTreasure = new Treasure("coral");
-    const secondTreasure = new Treasure("yellow");
-    const thirdTreasure = new Treasure("pink");
+    const shellTreasure = new Treasure("shell");
+    const chestTreasure = new Treasure("treasure-chest");
+    const jewelTreasure = new Treasure("jewel");
     // put the treasure items into the array
-    this.treasures.push(firstTreasure, secondTreasure, thirdTreasure);
-    
+    this.treasures.push(shellTreasure, chestTreasure, jewelTreasure);
+
+    // create a container for all timers and game status info
+    const infoContainer = document.createElement("div");
+    board.appendChild(infoContainer);
+    infoContainer.style.position = "absolute";
+    infoContainer.style.top = "10px";
+
     // create a stopwatch element that keeps track of the elapsed time
     const stopWatch = document.createElement("div");
     stopWatch.id = "stop-watch";
-    
-    board.appendChild(stopWatch);
-    
-    
-    
+    infoContainer.appendChild(stopWatch);
+
     // create an element for the air timer needed for each dive
     const airTimer = document.createElement("div");
     airTimer.id = "air-timer";
-    
-    board.appendChild(airTimer);
-    
+    infoContainer.appendChild(airTimer);
+
     // create an element that will show the player how many dives they can make
     const diveCounter = document.createElement("div");
     diveCounter.id = "dive-counter";
-    board.appendChild(diveCounter);
-    
+    infoContainer.appendChild(diveCounter);
+
+    this.setTimers();
     this.attachEventListeners();
     this.gameLoop();
+  }
+  start() {
+    // change from start screen to game board
+    const playButton = document.getElementById("play");
+    playButton.addEventListener("click", () => {
+      this.play();
+    });
   }
 
   detectCollision() {
@@ -109,7 +111,7 @@ class Game {
         sprite.classList.remove("left-facing");
         sprite.classList.add("right-facing");
       }
-      if (this.player.diveCount === 4 && input === "ArrowDown") {
+      if (this.player.diveCount === 4) {
         this.gameOver = true;
       }
     });
@@ -136,7 +138,12 @@ class Game {
     });
   }
   update() {
-    //console.log("in the update method")
+    // check the player state
+    if (this.player.top > 40) {
+      this.player.state = "diving";
+    } else if (this.player.top <= 40) {
+      this.player.state = "floating";
+    }
     this.player.move();
     this.detectCollision();
     if (this.player.top === 26) {
@@ -145,6 +152,7 @@ class Game {
       console.log(this.player.diveCount);
     }
 
+    // fills in content for the info container elements
     const stopWatch = document.getElementById("stop-watch");
     stopWatch.innerHTML = `<h5>Time Elapsed:<br> ${this.timeElapsed}</h5>`;
 
@@ -155,15 +163,6 @@ class Game {
     diveCounter.innerHTML = `<h5>Numer of dives:<br>${this.player.diveCount}</h5>`;
   }
   gameLoop() {
-    // check the player state
-    if (this.player.top > 40) {
-      this.player.state.diving = true;
-      this.player.state.floating = false;
-    } else if (this.player.top < 40) {
-      this.player.state.diving = false;
-      this.player.state.floating = true;
-    }
-
     this.update();
 
     // check if the game is won or lost
@@ -171,7 +170,7 @@ class Game {
       alert("You haven't got enough air to dive again");
       this.gameOver = true;
     }
-    if (!this.treasures.length && this.player.state.floating === true) {
+    if (!this.treasures.length && this.player.state === "floating") {
       this.gameWon = true;
     }
     if (this.gameWon || this.gameOver) {
@@ -181,18 +180,22 @@ class Game {
 
     window.requestAnimationFrame(() => this.gameLoop());
   }
-  airTimer() {
+  setTimers() {
     // console.log("starting the air timer")
     setInterval(() => {
-      if (this.player.state.floating === true) {
+      if (this.player.state === "floating") {
         this.remainingAir = 30;
       }
-      if (this.player.state.diving === true) {
+      if (this.player.state === "diving" && this.player.top > 30) {
         this.remainingAir -= 1;
       }
       if (this.remainingAir === 0) {
         this.gameOver = true;
       }
+    }, 1000);
+    // define an interval to keep count of the seconds elapsed
+    setInterval(() => {
+      this.timeElapsed += 1;
     }, 1000);
   }
   gameEnd() {
@@ -202,7 +205,7 @@ class Game {
     const endScreen = document.getElementById("end-screen");
     endScreen.style.display = "flex";
 
-    const replayButton = document.getElementById("reload");
+    const gameWon = document.getElementById("game-won")
     // calculate the score if the game was won
     if (this.gameWon) {
       const time = this.timeElapsed;
@@ -214,31 +217,31 @@ class Game {
         this.score += 20;
         this.score += 40 - time;
       }
-      (endScreen.innerHTML = `<div><h2>You won!</h2><br><br>Score:<h2 class="score">${this.score}</h2></div>`),
-        replayButton;
+      const gameLost = document.getElementById("game-lost");
+      gameLost.style.display = "none";
+      gameWon.innerHTML += `<br><p class="score">Score: ${this.score}</p>`
     }
     if (this.gameOver === true) {
-      (endScreen.innerHTML = `<div><h2>You lost</h2>$</div>`), replayButton;
+      gameWon.style.display = "none"
     }
   }
 }
 
 class Player {
-  constructor() {
-    this.height = 0;
-    this.width = 0;
+  constructor(boardWidth, boardHeight) {
+    this.height = 60;
+    this.width = 100;
+    this.boardWidth = boardWidth;
+    this.boardHeight = boardHeight;
     this.left = 400;
-    this.top = 20;
+    this.top = 0;
     this.directionX = 0;
     this.directionY = 0;
     this.diveCount = 0;
-    this.state = {
-      floating: true,
-      diving: false,
-    };
+    this.state = "floating";
 
     this.domElement = this.spawnPlayer();
-    this.domElement.style.position = "absolute";
+    this.domElement.style.position = "relative";
   }
   spawnPlayer() {
     // create the player sprite
@@ -260,17 +263,17 @@ class Player {
     this.top += this.directionY;
 
     // making sure the player stays within the board
-    if (this.left < 20) {
-      this.left = 20;
+    if (this.left < 0) {
+      this.left = 0;
     }
-    if (this.top < 20) {
-      this.top = 20;
+    if (this.top < 0) {
+      this.top = 0;
     }
-    if (this.left > 780) {
-      this.left = 780;
+    if (this.left > this.boardWidth - this.width) {
+      this.left = this.boardWidth - this.width;
     }
-    if (this.top > 480) {
-      this.top = 480;
+    if (this.top > this.boardHeight - this.height) {
+      this.top = this.boardHeight - this.height;
     }
 
     this.updatePosition();
@@ -283,42 +286,41 @@ class Player {
   }
 }
 class Treasure {
-  constructor(color) {
-    this.width = "4vw";
-    this.height = "4vh";
+  constructor(name) {
+    this.width = 60;
+    this.height = 60;
+    this.left = 0;
+    this.top = 0;
     this.isCollected = false;
 
-    this.domElement = this.placeTreasures(color);
+    this.domElement = this.placeTreasures(name);
   }
-  placeTreasures(color) {
+  placeTreasures(name) {
     const treasure = document.createElement("div");
-    treasure.id = color;
+    treasure.id = name;
     treasure.className = "treasure";
-    treasure.style.width = `${this.width}`;
-    treasure.style.height = `${this.height}`;
-    treasure.style.backgroundColor = color;
+    treasure.style.width = `${this.width}px`;
+    treasure.style.height = `${this.height}px`;
     treasure.style.position = "relative";
+    treasure.style.display = "block";
 
     // first location
 
-    if (treasure.id === "coral") {
-      treasure.style.left = "150px";
-      treasure.style.top = "480px";
+    if (treasure.id === "treasure-chest") {
+      treasure.style.left = "12%";
+      treasure.style.top = "50%";
     }
 
     // second location
-    if (treasure.id === "yellow") {
-      treasure.style.position = "absolute";
-      treasure.style.left = "400px";
-      treasure.style.top = "260px";
+    if (treasure.id === "jewel") {
+      treasure.style.left = "48%";
+      treasure.style.top = "38%";
     }
     // third location
-    else if (treasure.id === "pink") {
-      treasure.style.position = "absolute";
-      treasure.style.left = "780px";
-      treasure.style.top = "380px";
+    if (treasure.id === "shell") {
+      treasure.style.left = "87%";
+      treasure.style.top = "65%";
     }
-
     const board = document.getElementById("board");
     board.appendChild(treasure);
     return treasure;

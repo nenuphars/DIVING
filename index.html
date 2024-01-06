@@ -17,7 +17,12 @@
     </div>
     <div id="board"></div>
     <div id="end-screen">
-        <btn id="reload">Play Again!</btn>
+        <div id="end-container">
+            <h2 id="game-won">You Won!</h2>
+            <h2 id="game-lost">You Lost</h2>
+            <btn onclick="location.reload()"id="reload">Play Again!</btn>
+
+        </div>
     </div>
 </body>
 <script src="./index.js"></script>
