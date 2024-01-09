@@ -9,6 +9,10 @@ body{
 }
 #start-screen{
     display:block;
+    width: 800px;
+    height: 500px;
+    margin: 0 auto;
+    top: 10vh;
 }
 #instructions{
     width: 800px;
@@ -38,6 +42,9 @@ button{
     font-weight:500;
     border-radius: 4px;
     background-image: linear-gradient(#9ef96d,#8A6EFF );
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 #board {
   display: none;
@@ -63,13 +70,8 @@ button{
 #reload{
     height: 10vh;
     width: 20vw;
-    border: 2px solid blue;
     font-size: 24px;
-    border-radius: 4px;
-    background-color: aquamarine;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    
 }
 
 /*animates the player sprite according to direction*/

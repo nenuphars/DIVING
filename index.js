@@ -1,23 +1,60 @@
 class Game {
-  constructor() {
+  constructor(air) {
     this.player = null;
     this.treasures = [];
     this.width = 800;
     this.height = 500;
-    this.hasStarted = false;
-    this.remainingAir = 30;
+    this.remainingAir = air;
     this.timeElapsed = 0;
     this.score = 0;
-    this.gameOver = false;
-    this.gameWon = false;
+    this.state = undefined;
+  }
+  reset() {
+    console.log("status")
+
+      const endScreen = document.getElementById("end-screen");
+      endScreen.style.display = "none";
+      const board = document.getElementById("board")
+      board.style.display = "block"
+
+      
+      this.player.top = 0
+      this.player.left = 400
+      this.player.updatePosition()
+      this.treasures.forEach(element=>{
+          element.domElement.remove()
+      })
+      this.player.directionX = 0;
+      this.player.directionY = 0;
+      this.treasures = [];
+      this.timeElapsed = 0;
+      this.player.diveCount = 1;
+      this.player.state = "floating"
+      this.score = 0;
+      this.state = "play";
+
+
+    // create three treasure elements
+    const shellTreasure = new Treasure("shell");
+    const chestTreasure = new Treasure("treasure-chest");
+    const jewelTreasure = new Treasure("jewel");
+    // put the treasure items into the array
+    this.treasures.push(shellTreasure, chestTreasure, jewelTreasure);
+
+    this.gameLoop()
   }
   play() {
+    this.state = "play";
     const startScreen = document.getElementById("start-screen");
     startScreen.style.display = "none";
+    const endScreen = document.getElementById("end-screen");
+    endScreen.style.display = "none";
+
     const board = document.getElementById("board");
+    board.style.display = "block";
+    board.style.position = "relative";
     board.style.width = `${this.width}px`;
     board.style.height = `${this.height}px`;
-    board.style.display = "block";
     // set up the game board with player, treasures and divs for timers
     this.player = new Player(this.width, this.height);
 
@@ -54,6 +91,7 @@ class Game {
     this.gameLoop();
   }
   start() {
+    this.state = "start";
     // change from start screen to game board
     const playButton = document.getElementById("play");
     playButton.addEventListener("click", () => {
@@ -111,9 +149,7 @@ class Game {
         sprite.classList.remove("left-facing");
         sprite.classList.add("right-facing");
       }
-      if (this.player.diveCount === 4) {
-        this.gameOver = true;
-      }
+     
     });
     // resets the direction values when keys are up
     // arrow down is treated specially to make the player float up if it isnt pressed
@@ -139,19 +175,19 @@ class Game {
   }
   update() {
     // check the player state
-    if (this.player.top > 40) {
+    // console.log("player position", this.player.domElement.getBoundingClientRect())
+    // console.log("board", document.getElementById("board").getBoundingClientRect())
+    if (this.player.top > 6) {
       this.player.state = "diving";
-    } else if (this.player.top <= 40) {
+    } else if (this.player.top <= 6) {
+      if(this.player.state === "diving"){
+        this.player.diveCount += 1;
+      }
       this.player.state = "floating";
     }
+    
     this.player.move();
     this.detectCollision();
-    if (this.player.top === 26) {
-      this.player.diveCount += 0.5;
-      this.player.diveCount = Math.round(this.player.diveCount);
-      console.log(this.player.diveCount);
-    }
-
     // fills in content for the info container elements
     const stopWatch = document.getElementById("stop-watch");
     stopWatch.innerHTML = `<h5>Time Elapsed:<br> ${this.timeElapsed}</h5>`;
@@ -167,15 +203,14 @@ class Game {
 
     // check if the game is won or lost
     if (this.player.diveCount > 3) {
-      alert("You haven't got enough air to dive again");
-      this.gameOver = true;
+      this.state = "lost";
     }
     if (!this.treasures.length && this.player.state === "floating") {
-      this.gameWon = true;
+      this.state = "won";
     }
-    if (this.gameWon || this.gameOver) {
+    if (this.state === "lost" || this.state === "won") {
       this.gameEnd();
-      return;
+      return this.timeElapsed
     }
 
     window.requestAnimationFrame(() => this.gameLoop());
@@ -184,13 +219,13 @@ class Game {
     // console.log("starting the air timer")
     setInterval(() => {
       if (this.player.state === "floating") {
-        this.remainingAir = 30;
+        this.remainingAir = 20;
       }
-      if (this.player.state === "diving" && this.player.top > 30) {
+      if (this.player.state === "diving" && this.player.top > 20) {
         this.remainingAir -= 1;
       }
       if (this.remainingAir === 0) {
-        this.gameOver = true;
+        this.state = "lost";
       }
     }, 1000);
     // define an interval to keep count of the seconds elapsed
@@ -205,25 +240,32 @@ class Game {
     const endScreen = document.getElementById("end-screen");
     endScreen.style.display = "flex";
 
-    const gameWon = document.getElementById("game-won")
+    const gameWon = document.getElementById("game-won");
+    const gameLost = document.getElementById("game-lost");
     // calculate the score if the game was won
-    if (this.gameWon) {
+    if (this.state === "won") {
       const time = this.timeElapsed;
-      if (time <= 60) {
-        this.score += 10;
-        this.score += 60 - time;
-      }
-      if (time <= 40) {
+      if (time <= 50) {
         this.score += 20;
-        this.score += 40 - time;
+        this.score += 50 - time;
       }
-      const gameLost = document.getElementById("game-lost");
+      if (time <= 30) {
+        this.score += 40;
+        this.score += 30 - time;
+      }
       gameLost.style.display = "none";
-      gameWon.innerHTML += `<br><p class="score">Score: ${this.score}</p>`
+      const scoreDomElement = document.createElement("div")
+      gameWon.appendChild(scoreDomElement)
+      scoreDomElement.innerHTML = `<br><p class="score">Score: ${this.score}</p>`;
     }
-    if (this.gameOver === true) {
-      gameWon.style.display = "none"
+    if (this.state === "lost") {
+      gameWon.style.display = "none";
     }
+    const replay = document.getElementById("reload");
+    replay.addEventListener("click", () => {
+      this.reset()
+      return;
+    });
   }
 }
 
@@ -237,7 +279,7 @@ class Player {
     this.top = 0;
     this.directionX = 0;
     this.directionY = 0;
-    this.diveCount = 0;
+    this.diveCount = 1;
     this.state = "floating";
 
     this.domElement = this.spawnPlayer();
@@ -253,7 +295,7 @@ class Player {
     sprite.style.top = `${this.top}px`;
     sprite.classList.add("right-facing");
 
-    // append the sprite in to the board
+    // append the sprite to the board
     const board = document.getElementById("board");
     board.appendChild(sprite);
     return sprite;
@@ -289,8 +331,8 @@ class Treasure {
   constructor(name) {
     this.width = 60;
     this.height = 60;
-    this.left = 0;
-    this.top = 0;
+    // this.left = 0;
+    // this.top = 0;
     this.isCollected = false;
 
     this.domElement = this.placeTreasures(name);
@@ -301,11 +343,10 @@ class Treasure {
     treasure.className = "treasure";
     treasure.style.width = `${this.width}px`;
     treasure.style.height = `${this.height}px`;
-    treasure.style.position = "relative";
+    treasure.style.position = "absolute";
     treasure.style.display = "block";
 
     // first location
-
     if (treasure.id === "treasure-chest") {
       treasure.style.left = "12%";
       treasure.style.top = "50%";
@@ -327,5 +368,5 @@ class Treasure {
   }
 }
 
-const game = new Game();
+const game = new Game(20);
 game.start();
