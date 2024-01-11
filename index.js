@@ -10,29 +10,27 @@ class Game {
     this.state = undefined;
   }
   reset() {
-    console.log("status")
+    console.log("status");
 
-      const endScreen = document.getElementById("end-screen");
-      endScreen.style.display = "none";
-      const board = document.getElementById("board")
-      board.style.display = "block"
+    const endScreen = document.getElementById("end-screen");
+    endScreen.style.display = "none";
+    const board = document.getElementById("board");
+    board.style.display = "block";
 
-      
-      this.player.top = 0
-      this.player.left = 400
-      this.player.updatePosition()
-      this.treasures.forEach(element=>{
-          element.domElement.remove()
-      })
-      this.player.directionX = 0;
-      this.player.directionY = 0;
-      this.treasures = [];
-      this.timeElapsed = 0;
-      this.player.diveCount = 1;
-      this.player.state = "floating"
-      this.score = 0;
-      this.state = "play";
-
+    this.player.top = 0;
+    this.player.left = 400;
+    this.player.updatePosition();
+    this.treasures.forEach((element) => {
+      element.domElement.remove();
+    });
+    this.player.directionX = 0;
+    this.player.directionY = 0;
+    this.treasures = [];
+    this.timeElapsed = 0;
+    this.player.diveCount = 1;
+    this.player.state = "floating";
+    this.score = 0;
+    this.state = "play";
 
     // create three treasure elements
     const shellTreasure = new Treasure("shell");
@@ -41,7 +39,7 @@ class Game {
     // put the treasure items into the array
     this.treasures.push(shellTreasure, chestTreasure, jewelTreasure);
 
-    this.gameLoop()
+    this.gameLoop();
   }
   play() {
     this.state = "play";
@@ -65,12 +63,7 @@ class Game {
     // put the treasure items into the array
     this.treasures.push(shellTreasure, chestTreasure, jewelTreasure);
 
-    // create a container for all timers and game status info
-    const infoContainer = document.createElement("div");
-    board.appendChild(infoContainer);
-    infoContainer.style.position = "absolute";
-    infoContainer.style.top = "10px";
-
+    const infoContainer = document.getElementById("info-container");
     // create a stopwatch element that keeps track of the elapsed time
     const stopWatch = document.createElement("div");
     stopWatch.id = "stop-watch";
@@ -85,6 +78,11 @@ class Game {
     const diveCounter = document.createElement("div");
     diveCounter.id = "dive-counter";
     infoContainer.appendChild(diveCounter);
+
+    // create a score counter dom element
+    const scoreCounter = document.createElement("div");
+    scoreCounter.id = "score-counter";
+    infoContainer.appendChild(scoreCounter);
 
     this.setTimers();
     this.attachEventListeners();
@@ -120,7 +118,7 @@ class Game {
     this.treasures.forEach((treasure, index) => {
       if (treasure.isCollected === true) {
         treasure.domElement.style.display = "none";
-        this.score += 20;
+        this.score += treasure.score;
         this.treasures.splice(index, 1);
       }
     });
@@ -149,7 +147,6 @@ class Game {
         sprite.classList.remove("left-facing");
         sprite.classList.add("right-facing");
       }
-     
     });
     // resets the direction values when keys are up
     // arrow down is treated specially to make the player float up if it isnt pressed
@@ -180,23 +177,26 @@ class Game {
     if (this.player.top > 6) {
       this.player.state = "diving";
     } else if (this.player.top <= 6) {
-      if(this.player.state === "diving"){
+      if (this.player.state === "diving") {
         this.player.diveCount += 1;
       }
       this.player.state = "floating";
     }
-    
+
     this.player.move();
     this.detectCollision();
     // fills in content for the info container elements
     const stopWatch = document.getElementById("stop-watch");
-    stopWatch.innerHTML = `<h5>Time Elapsed:<br> ${this.timeElapsed}</h5>`;
+    stopWatch.innerHTML = `<h5>Time:<h3 class="counter-number">${this.timeElapsed}</h3></h5>`;
 
     const diveTimer = document.getElementById("air-timer");
-    diveTimer.innerHTML = `<h5>Remaining air:<br> ${this.remainingAir}`;
+    diveTimer.innerHTML = `<h5>Air supply:<br><h3 class="counter-number">${this.remainingAir}</h3></h5>`;
 
     const diveCounter = document.getElementById("dive-counter");
-    diveCounter.innerHTML = `<h5>Numer of dives:<br>${this.player.diveCount}</h5>`;
+    diveCounter.innerHTML = `<h5>Dives:<br><h3 class="counter-number">${this.player.diveCount}</h3></h5>`;
+
+    const scoreCounter = document.getElementById("score-counter");
+    scoreCounter.innerHTML = `<h5>Score:<br><h3 class="counter-number">${this.score}</h3></h5>`;
   }
   gameLoop() {
     this.update();
@@ -210,7 +210,7 @@ class Game {
     }
     if (this.state === "lost" || this.state === "won") {
       this.gameEnd();
-      return this.timeElapsed
+      return this.timeElapsed;
     }
 
     window.requestAnimationFrame(() => this.gameLoop());
@@ -238,32 +238,37 @@ class Game {
     const board = document.getElementById("board");
     board.style.display = "none";
     const endScreen = document.getElementById("end-screen");
-    endScreen.style.display = "flex";
+    endScreen.style.display = "block";
 
     const gameWon = document.getElementById("game-won");
     const gameLost = document.getElementById("game-lost");
+
     // calculate the score if the game was won
+    let timeBonus = 0;
+    const treasuresScore = this.score;
     if (this.state === "won") {
       const time = this.timeElapsed;
       if (time <= 50) {
-        this.score += 20;
-        this.score += 50 - time;
+        timeBonus += 20;
+        timeBonus += 50 - time;
       }
       if (time <= 30) {
-        this.score += 40;
-        this.score += 30 - time;
+        timeBonus += 20;
+        timeBonus += 30 - time;
       }
+      this.score += timeBonus;
       gameLost.style.display = "none";
-      const scoreDomElement = document.createElement("div")
-      gameWon.appendChild(scoreDomElement)
-      scoreDomElement.innerHTML = `<br><p class="score">Score: ${this.score}</p>`;
+      gameWon.style.display = "flex";
+      let scoreDomElement = document.getElementById("score");
+      scoreDomElement.innerHTML = `Points: ${treasuresScore}<br>Time Bonus: ${timeBonus}<br><br> <strong>Score: ${this.score}</strong>`;
     }
     if (this.state === "lost") {
       gameWon.style.display = "none";
+      gameLost.style.display = "flex";
     }
     const replay = document.getElementById("reload");
     replay.addEventListener("click", () => {
-      this.reset()
+      this.reset();
       return;
     });
   }
@@ -331,8 +336,8 @@ class Treasure {
   constructor(name) {
     this.width = 60;
     this.height = 60;
-    // this.left = 0;
-    // this.top = 0;
+    this.score = 30;
+
     this.isCollected = false;
 
     this.domElement = this.placeTreasures(name);
@@ -349,18 +354,25 @@ class Treasure {
     // first location
     if (treasure.id === "treasure-chest") {
       treasure.style.left = "12%";
-      treasure.style.top = "50%";
+      treasure.style.top = "70%";
+      treasure.style.height = "100px"
+      treasure.style.width = "100px"
+      treasure.style.transform = "scaleX(-1)"
+      treasure.score += 40;
     }
 
     // second location
     if (treasure.id === "jewel") {
       treasure.style.left = "48%";
-      treasure.style.top = "38%";
+      treasure.style.top = "82%";
+      treasure.score += 30;
     }
     // third location
     if (treasure.id === "shell") {
       treasure.style.left = "87%";
       treasure.style.top = "65%";
+
+      treasure.score += 20;
     }
     const board = document.getElementById("board");
     board.appendChild(treasure);

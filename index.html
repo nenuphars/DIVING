@@ -9,22 +9,25 @@
 <body>
     <div id="start-screen">
         <div id="instructions">
-            <h1 id="title">Diving for Treasure</h1>
-            <h6>...not everything's for pleasure</h6>
-            <p>Collect all the treasures as fast as you can. But watch out for your air supply, it will run out quickly!</p>
+            <h1 id="title">DIVING FOR TREASURE</h1>
+            <h5>...not everything's for pleasure</h5>
+            <p>Collect all the treasures as fast as you can using the arrow buttons. But watch out for your air supply, it will run out quickly!</p>
             <button id="play">PLAY</button>
         </div>
     </div>
     <div id="board">
+        <div id="info-container"></div>
         <div id="floor"></div>
     </div>
     <div id="end-screen">
-        <div id="end-container">
-            <h2 id="game-won">You Won!</h2>
-            <h2 id="game-lost">You Lost</h2>
-            <button id="reload">Play Again!</button>
-
-        </div>
+            <div id="game-won"><h2>You Won!</h2>
+                <p id="score"></p>
+                <button id="reload">Play Again!</button>
+            </div>
+            <div id="game-lost"><h2>Better luck next time!</h2>
+                <button id="reload">Play Again!</button>
+                </div>
+            
     </div>
 </body>
 <script src="./index.js"></script>
