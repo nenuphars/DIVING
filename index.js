@@ -10,8 +10,6 @@ class Game {
     this.state = undefined;
   }
   reset() {
-    console.log("status");
-
     const endScreen = document.getElementById("end-screen");
     endScreen.style.display = "none";
     const board = document.getElementById("board");
@@ -170,10 +168,8 @@ class Game {
       }
     });
   }
-  update() {
-    // check the player state
-    // console.log("player position", this.player.domElement.getBoundingClientRect())
-    // console.log("board", document.getElementById("board").getBoundingClientRect())
+  gameLoop() {
+    // updates the player state and dive count
     if (this.player.top > 6) {
       this.player.state = "diving";
     } else if (this.player.top <= 6) {
@@ -183,8 +179,10 @@ class Game {
       this.player.state = "floating";
     }
 
+    // movement and collecting treasures with collision
     this.player.move();
     this.detectCollision();
+
     // fills in content for the info container elements
     const stopWatch = document.getElementById("stop-watch");
     stopWatch.innerHTML = `<h5>Time:<h3 class="counter-number">${this.timeElapsed}</h3></h5>`;
@@ -197,9 +195,6 @@ class Game {
 
     const scoreCounter = document.getElementById("score-counter");
     scoreCounter.innerHTML = `<h5>Score:<br><h3 class="counter-number">${this.score}</h3></h5>`;
-  }
-  gameLoop() {
-    this.update();
 
     // check if the game is won or lost
     if (this.player.diveCount > 3) {
@@ -210,10 +205,13 @@ class Game {
     }
     if (this.state === "lost" || this.state === "won") {
       this.gameEnd();
-      return this.timeElapsed;
     }
 
-    window.requestAnimationFrame(() => this.gameLoop());
+    const animationID = window.requestAnimationFrame(() => this.gameLoop());
+    // ends the animation loop of the game
+    if(this.state === "won" || this.state === "lost" || this.state === "end"){
+      cancelAnimationFrame(animationID)
+    }
   }
   setTimers() {
     // console.log("starting the air timer")
@@ -266,11 +264,15 @@ class Game {
       gameWon.style.display = "none";
       gameLost.style.display = "flex";
     }
-    const replay = document.getElementById("reload");
-    replay.addEventListener("click", () => {
-      this.reset();
-      return;
-    });
+    this.state = "end"
+    // add event listeners to the restart buttons in the two versions of the end screen
+    // const restartButtons = document.querySelectorAll(".restart");
+    // restartButtons.forEach((button)=>{
+    //   button.addEventListener("click", () => {
+    //     this.reset();
+    //   });
+
+    // })
   }
 }
 
